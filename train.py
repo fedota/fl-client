@@ -12,6 +12,8 @@ import numpy as np
 import six
 from pathlib import Path
 
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"  
+
 import tensorflow as tf
 import keras
 from tensorflow.keras import layers
@@ -37,7 +39,14 @@ EVAL_FREQUENCY = 100  # Number of steps between evaluations.
 
 
 
-def train_on_device(device_path, model_path, ckpt_path):
+def get_mnist_images_and_labels(data_dir):
+    images = np.load(data_dir + '/mnist-images.npy')
+    labels = np.load(data_dir + '/mnist-labels.npy')
+    return (images, labels)
+
+
+
+def train_on_device(data_dir, model_path, ckpt_path, weight_updates_path):
     """
     Returns (n, weight_updates) after training on local data    
     """
@@ -53,16 +62,16 @@ def train_on_device(device_path, model_path, ckpt_path):
 #    print(device_model.summary())
     
     # Get training data present on device
-    train_images, train_labels = get_mnist_images_and_labels(device_path)
+    train_images, train_labels = get_mnist_images_and_labels(data_dir)
     
     # Train model
     device_model.fit(train_images, train_labels,
           batch_size=BATCH_SIZE,
-          epochs=2,
+          epochs=1,
           verbose=1)
     
     # Load model to store weight updates
-    update_weights = load_model(model_path)
+    weight_updates = load_model(model_path)
     
     # Number of batches trained on device
     num_batches = train_images.shape[0] // BATCH_SIZE
@@ -77,15 +86,14 @@ def train_on_device(device_path, model_path, ckpt_path):
         new_layer_weights = device_model.layers[i].get_weights()
 
         # Weight updates calculation
-        update_weights.layers[i].set_weights(num_batches * (np.asarray(new_layer_weights) - np.asarray(old_layer_weights)))
+        weight_updates.layers[i].set_weights(num_batches * (np.asarray(new_layer_weights) - np.asarray(old_layer_weights)))
     
     #    print("old weights: ",  old_layer_weights)
     #    print("new weights: ",  new_layer_weights)
-    #    print("update weights: ",  update_weights.layers[i].get_weights())
+    #    print("weight updates: ",  weight_updates.layers[i].get_weights())
     
     
     # Save weight updates
-    update_weights_path = device_path + '/weight_updates'
-    update_weights.save_weights(update_weights_path)
+    weight_updates.save_weights(weight_updates_path)
     
-    return (num_batches, update_weights_path)
+    return (num_batches, weight_updates_path)
