@@ -66,6 +66,9 @@ def run():
                 #print(responses)
                 # received_bytes = bytes()
                 for response in responses:
+                    if(response.type == fl_round_pb2.FL_RECONN_TIME):
+                        print("Could not Check in. Reconnect after " + str(response.intVal) +" seconds")
+                        exit(-1)
                     #print(response)
                     checkpoint_file.write(response.message.content)
                     # print('Received %d bytes...', len(response.chunk))
