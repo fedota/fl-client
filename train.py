@@ -46,7 +46,7 @@ def get_mnist_images_and_labels(data_dir):
 
 
 
-def train_on_device(data_dir, model_path, ckpt_path, weight_updates_path):
+def train_on_device(data_dir, dataset_id, model_path, ckpt_path, weight_updates_path):
     """
     Returns (n, weight_updates) after training on local data    
     """
@@ -64,6 +64,15 @@ def train_on_device(data_dir, model_path, ckpt_path, weight_updates_path):
     # Get training data present on device
     train_images, train_labels = get_mnist_images_and_labels(data_dir)
     
+    NUM_IMAGES = train_images.shape[0]
+    NUM_DIVISIONS = 5
+    DIVISION_LEN = NUM_IMAGES // NUM_DIVISIONS
+
+    start_ind = (DIVISION_LEN * (dataset_id-1))
+    end_ind = (DIVISION_LEN * dataset_id)
+    train_images = train_images[start_ind : end_ind]
+    train_labels = train_labels[start_ind : end_ind]
+
     # Train model
     device_model.fit(train_images, train_labels,
           batch_size=BATCH_SIZE,

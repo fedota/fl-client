@@ -83,7 +83,7 @@ def run():
             
         # Call helper functions from train.py to train and send back
         # TODO: Train
-        num_batches, weight_updates_path = train_on_device(data_dir, model_file_path, checkpoint_file_path, weight_updates_file_path)
+        num_batches, weight_updates_path = train_on_device(data_dir, dataset_id, model_file_path, checkpoint_file_path, weight_updates_file_path)
         
         print('----- Completed training on device -----')
 
@@ -95,12 +95,13 @@ def run():
 
 if __name__ == '__main__':
 
-    if len (sys.argv) != 2 :
-        print("Usage: python main.py <path to directory containing device's content>")
+    if len (sys.argv) != 3 :
+        print("Usage: python main.py <path to directory containing device's content> <dataset id (1, 2, 3, 4, 5)>")
         sys.exit (1)
 
     device_dir = sys.argv[1]
-    
+    dataset_id = int(sys.argv[2])
+
     data_dir = device_dir + '/data/'
     checkpoint_file_path = device_dir + '/checkpoint/fl_checkpoint'
     model_file_path = device_dir + '/model/model.h5'
