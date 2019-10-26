@@ -8,7 +8,7 @@ import grpc
 from fl_round import fl_round_pb2
 from fl_round import fl_round_pb2_grpc
 
-from train import train_on_device
+from senti_train import train_on_device
 
 _TIMEOUT_SECONDS = 10000
 address = 'localhost:50051'
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     data_dir = device_dir + '/data/'
     checkpoint_file_path = device_dir + '/checkpoint/fl_checkpoint'
     model_file_path = device_dir + '/model/model.h5'
-    weight_updates_file_path = device_dir + 'weight_updates/fl_weight_updates'
+    weight_updates_file_path = device_dir + '/weight_updates/fl_weight_updates'
 
     logging.basicConfig()
     run()
