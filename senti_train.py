@@ -14,13 +14,15 @@ from keras.layers import LSTM
 from keras.layers.embeddings import Embedding
 from keras.models import load_model 
 import string
+import random
+import pickle
 
 
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"  
 
 
 BATCH_SIZE = 64
-NUM_EPOCHS = 1
+NUM_EPOCHS = 3
 
 
 
@@ -61,31 +63,44 @@ def process_docs(directory, vocab):
         documents.append(tokens)
     return documents
 
-def get_train_data(data_dir, vocab, is_train=True):
+def get_data(data_dir, dataset_id, vocab, tokenizer, is_train=True):
     if(is_train) :
         positive_docs = process_docs(data_dir + '/train/pos', vocab)
         negative_docs = process_docs(data_dir + '/train/neg', vocab)
+
+        num_rows = len(positive_docs)
+        num_divisions = 5
+        division_len = num_rows // num_divisions
+        start_ind = (division_len * (dataset_id-1))
+        end_ind = (division_len * dataset_id)
+        positive_docs = positive_docs[start_ind : end_ind]
+
+        num_rows = len(negative_docs)
+        num_divisions = 5
+        division_len = num_rows // num_divisions
+        start_ind = (division_len * (dataset_id-1))
+        end_ind = (division_len * dataset_id)
+        negative_docs = negative_docs[start_ind : end_ind]
+
+
     else:
         positive_docs = process_docs(data_dir + '/test/pos', vocab)
         negative_docs = process_docs(data_dir + '/test/neg', vocab)
-    
-    train_docs = negative_docs + positive_docs
+
+
+    docs = negative_docs + positive_docs
+
     positive_docs_len = len(positive_docs)
     negative_docs_len = len(negative_docs)
 
-    # create the tokenizer
-    tokenizer = Tokenizer()
-    # fit the tokenizer on the documents
-    tokenizer.fit_on_texts(train_docs)
-
     # sequence encode
-    encoded_docs = tokenizer.texts_to_sequences(train_docs)
+    encoded_docs = tokenizer.texts_to_sequences(docs)
 
     max_length = 80
     X = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 
     # define training labels
-    y = np.array([0 for _ in range(positive_docs_len)] + [1 for _ in range(negative_docs_len)])
+    y = np.array([0 for _ in range(negative_docs_len)] + [1 for _ in range(positive_docs_len)])
 
     return X, y
 
@@ -109,24 +124,34 @@ def train_on_device(data_dir, dataset_id, model_path, ckpt_path, weight_updates_
     vocab = load_doc(vocab_filename)
     vocab = vocab.split()
     vocab = set(vocab)
+
+    
+    # create the tokenizer
+    tokenizer = Tokenizer()
+
+    # loading tokenizer from file
+    tokenizer_filename = data_dir + 'tokenizer.pickle'
+    with open(tokenizer_filename, 'rb') as handle:
+        tokenizer = pickle.load(handle)
     
     # Get training data present on device
-    X_train, y_train = get_train_data(data_dir, vocab, is_train=True)
-    
-    # NUM_IMAGES = train_images.shape[0]
-    # NUM_DIVISIONS = 5
-    # DIVISION_LEN = NUM_IMAGES // NUM_DIVISIONS
+    X_train, y_train = get_data(data_dir, dataset_id, vocab, tokenizer, is_train=True)
 
-    # start_ind = (DIVISION_LEN * (dataset_id-1))
-    # end_ind = (DIVISION_LEN * dataset_id)
-    # train_images = train_images[start_ind : end_ind]
-    # train_labels = train_labels[start_ind : end_ind]
+    X_test, y_test = get_data(data_dir, dataset_id, vocab, tokenizer, is_train=False)
+
+    scores = device_model.evaluate(X_test, y_test, verbose=0)
+    print("Test Accuracy(before training): %.2f%%" % (scores[1]*100))
 
     # Train model
     device_model.fit(X_train, y_train, 
     epochs=NUM_EPOCHS, 
     batch_size=BATCH_SIZE)
+
     
+    
+    scores = device_model.evaluate(X_test, y_test, verbose=0)
+    print("Test Accuracy(after training): %.2f%%" % (scores[1]*100))
+
     # Load model to store weight updates
     weight_updates = load_model(model_path)
     
