@@ -7,7 +7,8 @@ import yaml
 
 from fl_round import fl_round_pb2
 from fl_round import fl_round_pb2_grpc
-from train import train_on_device
+
+from senti_train import train_on_device
 
 CONFIG_FILE = "config.yaml"
 config = {}
