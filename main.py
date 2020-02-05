@@ -7,7 +7,6 @@ import yaml
 
 from fl_round import fl_round_pb2
 from fl_round import fl_round_pb2_grpc
-
 from senti_train import train_on_device
 
 CONFIG_FILE = "config.yaml"
@@ -32,14 +31,14 @@ def get_weight_updates(weight_updates_file_path, num_batches, chunker_size):
         while chunk:
             # print(str(chunk))
             yield fl_round_pb2.FlData(
-                message=fl_round_pb2.Chunk(content=chunk),
-                type=fl_round_pb2.FL_CHECKPOINT_UPDATE,
+                chunk=chunk,
+                type=fl_round_pb2.FL_FILES,
                 # intVal=num_batches
             )
             chunk = file.read(chunker_size)
 
     yield fl_round_pb2.FlData(
-        type=fl_round_pb2.FL_CHECKPOINT_WEIGHT, intVal=num_batches,
+        type=fl_round_pb2.FL_INT, intVal=num_batches,
     )
 
 
@@ -70,7 +69,7 @@ def run():
                     with open(
                         get_save_path(response.filePath), "a+",
                     ) as checkpoint_file:
-                        checkpoint_file.write(response.message.content)
+                        checkpoint_file.write(response.chunk)
 
             print("------- Checkpoint file downloaded successfully ------")
 
@@ -104,9 +103,9 @@ if __name__ == "__main__":
     dataset_id = config["dataset-id"]
 
     data_dir = device_dir + "/data/"
-    checkpoint_file_path = device_dir + "/checkpoint/fl_checkpoint"
-    model_file_path = device_dir + "/model/model.h5"
-    weight_updates_file_path = device_dir + "/weight_updates/fl_weight_updates"
+    checkpoint_file_path = device_dir + "/fl_checkpoint"
+    model_file_path = device_dir + "/model.h5"
+    weight_updates_file_path = device_dir + "/fl_weight_updates"
 
     logging.basicConfig()
     run()
