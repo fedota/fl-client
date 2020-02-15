@@ -1,7 +1,7 @@
 appName: fl-client
 # logLevel: DEBUG
 port: 50051
-device-dir: "../device_data/device"
+device-dir: "../device1"
 dataset-id: 1
 timeout-in-seconds: 10000
 address: "localhost:50051"

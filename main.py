@@ -29,16 +29,15 @@ def get_weight_updates(weight_updates_file_path, num_batches, chunker_size):
     with open(weight_updates_file_path, "rb") as file:
         chunk = file.read(chunker_size)
         while chunk:
-            # print(str(chunk))
             yield fl_round_pb2.FlData(
                 chunk=chunk,
                 type=fl_round_pb2.FL_FILES,
-                # intVal=num_batches
             )
             chunk = file.read(chunker_size)
 
     yield fl_round_pb2.FlData(
-        type=fl_round_pb2.FL_INT, intVal=num_batches,
+        type=fl_round_pb2.FL_INT, 
+        intVal=num_batches,
     )
 
 
@@ -67,7 +66,7 @@ def run():
 
                 elif response.type == fl_round_pb2.FL_FILES:
                     with open(
-                        get_save_path(response.filePath), "a+",
+                        get_save_path(response.filePath), "ab+",
                     ) as checkpoint_file:
                         checkpoint_file.write(response.chunk)
 
