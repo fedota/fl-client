@@ -1,13 +1,13 @@
 FROM tensorflow/tensorflow:latest-py3
 
 # Install dependencies
-RUN pip3 install keras numpy
+RUN pip3 install keras
 
 # Add this directory to /client in docker container
 ADD . /client
 
-RUN mkdir /dataweight_updates
+RUN mkdir -p /data/weight_updates
 
 WORKDIR /client
 
-ENTRYPOINT [ "python3", "main.py", "../data" ]
+ENTRYPOINT [ "python3", "main.py"]
