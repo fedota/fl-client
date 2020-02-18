@@ -15,7 +15,7 @@ config = {}
 
 def get_save_path(fileName):
     """Directory path to store required files."""
-    return os.path.join(config["device-dir"], fileName)
+    return os.path.join(config["device-dir"], config["fl-init-dir"], fileName)
 
 
 def checkInMessages():
@@ -40,6 +40,16 @@ def get_weight_updates(weight_updates_file_path, num_batches, chunker_size):
         intVal=num_batches,
     )
 
+# Deletes FL init files
+def deleteFLInitFiles():
+    folder = os.path.join(config["device-dir"], config["fl-init-dir"])
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def run():
     """Starts the grpc server to connect to selectors."""
@@ -84,6 +94,8 @@ def run():
             weight_updates_file_path,
         )
 
+        deleteFLInitFiles()
+
         print("----- Completed training on device -----")
 
         updated_chunks = get_weight_updates(
@@ -98,13 +110,11 @@ if __name__ == "__main__":
 
     config = yaml.load(open(CONFIG_FILE, "r"))
 
-    device_dir = config["device-dir"]
+    data_dir = os.path.join(config["device-dir"], config["data-dir"])
+    checkpoint_file_path = os.path.join(config["device-dir"], config["fl-init-dir"], config["checkpoint_file"])
+    model_file_path = os.path.join(config["device-dir"], config["fl-init-dir"], config["model_file"])
+    weight_updates_file_path = os.path.join(config["device-dir"], config["weight_updates_file"])
     dataset_id = config["dataset-id"]
-
-    data_dir = device_dir + "/data/"
-    checkpoint_file_path = device_dir + "/fl_checkpoint"
-    model_file_path = device_dir + "/model.h5"
-    weight_updates_file_path = device_dir + "/fl_weight_updates"
 
     logging.basicConfig()
     run()

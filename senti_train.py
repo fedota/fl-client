@@ -14,7 +14,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 
 BATCH_SIZE = 64
-NUM_EPOCHS = 3
+NUM_EPOCHS = 1
 
 
 # load doc into memory
@@ -47,7 +47,7 @@ def process_docs(directory, vocab):
     # walk through all files in the folder
     for filename in listdir(directory):
         # create the full path of the file to open
-        path = directory + "/" + filename
+        path = os.path.join(directory, filename)
         # load the doc
         doc = load_doc(path)
         # clean doc
@@ -59,8 +59,8 @@ def process_docs(directory, vocab):
 
 def get_data(data_dir, dataset_id, vocab, tokenizer, is_train=True):
     if is_train:
-        positive_docs = process_docs(data_dir + "/train/pos", vocab)
-        negative_docs = process_docs(data_dir + "/train/neg", vocab)
+        positive_docs = process_docs(os.path.join(data_dir, "train/pos"), vocab)
+        negative_docs = process_docs(os.path.join(data_dir, "train/neg"), vocab)
 
         num_rows = len(positive_docs)
         num_divisions = 5
@@ -77,8 +77,8 @@ def get_data(data_dir, dataset_id, vocab, tokenizer, is_train=True):
         negative_docs = negative_docs[start_ind:end_ind]
 
     else:
-        positive_docs = process_docs(data_dir + "/test/pos", vocab)
-        negative_docs = process_docs(data_dir + "/test/neg", vocab)
+        positive_docs = process_docs(os.path.join(data_dir, "test/pos"), vocab)
+        negative_docs = process_docs(os.path.join(data_dir, "test/neg"), vocab)
 
     docs = negative_docs + positive_docs
 
@@ -113,7 +113,7 @@ def train_on_device(data_dir, dataset_id, model_path, ckpt_path, weight_updates_
     #    print(device_model.summary())
 
     # load the vocabulary
-    vocab_filename = data_dir + "/vocab.txt"
+    vocab_filename = os.path.join(data_dir, "vocab.txt")
     vocab = load_doc(vocab_filename)
     vocab = vocab.split()
     vocab = set(vocab)
@@ -122,7 +122,7 @@ def train_on_device(data_dir, dataset_id, model_path, ckpt_path, weight_updates_
     tokenizer = Tokenizer()
 
     # loading tokenizer from file
-    tokenizer_filename = data_dir + "tokenizer.pickle"
+    tokenizer_filename = os.path.join(data_dir, "tokenizer.pickle")
     with open(tokenizer_filename, "rb") as handle:
         tokenizer = pickle.load(handle)
 
