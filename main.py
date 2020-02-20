@@ -15,7 +15,7 @@ config = {}
 
 def get_save_path(fileName):
     """Directory path to store required files."""
-    return os.path.join(config["device-dir"], config["fl-init-dir"], fileName)
+    return os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"], fileName)
 
 
 def checkInMessages():
@@ -42,7 +42,7 @@ def get_weight_updates(weight_updates_file_path, num_batches, chunker_size):
 
 # Deletes FL init files
 def deleteFLInitFiles():
-    folder = os.path.join(config["device-dir"], config["fl-init-dir"])
+    folder = os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"])
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
         try:
@@ -56,13 +56,13 @@ def run():
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
     # used in circumstances in which the with statement does not fit the needs
     # of the code.
-    address = config["address"]
+    address = config["SELECTOR_ADDRESS"]
 
     with grpc.insecure_channel(address) as channel:
         client = fl_round_pb2_grpc.FlRoundStub(channel)
 
         try:
-            responses = client.CheckIn(checkInMessages(), config["timeout-in-seconds"])
+            responses = client.CheckIn(checkInMessages(), config["TIMEOUT_IN_SECONDS"])
 
             for response in responses:
                 if response.type == fl_round_pb2.FL_INT:
@@ -77,8 +77,8 @@ def run():
                 elif response.type == fl_round_pb2.FL_FILES:
                     with open(
                         get_save_path(response.filePath), "ab+",
-                    ) as checkpoint_file:
-                        checkpoint_file.write(response.chunk)
+                    ) as CHECKPOINT_FILE:
+                        CHECKPOINT_FILE.write(response.chunk)
 
             print("------- Checkpoint file downloaded successfully ------")
 
@@ -99,10 +99,10 @@ def run():
         print("----- Completed training on device -----")
 
         updated_chunks = get_weight_updates(
-            weight_updates_path, num_batches, config["chunker-size"],
+            weight_updates_path, num_batches, config["CHUNKER_SIZE"],
         )
         # print(updated_chunks)
-        response = client.Update(updated_chunks, config["timeout-in-seconds"])
+        response = client.Update(updated_chunks, config["TIMEOUT_IN_SECONDS"])
         print("----- Weight updates sent to server -----")
 
 
@@ -110,11 +110,11 @@ if __name__ == "__main__":
 
     config = yaml.load(open(CONFIG_FILE, "r"))
 
-    data_dir = os.path.join(config["device-dir"], config["data-dir"])
-    checkpoint_file_path = os.path.join(config["device-dir"], config["fl-init-dir"], config["checkpoint_file"])
-    model_file_path = os.path.join(config["device-dir"], config["fl-init-dir"], config["model_file"])
-    weight_updates_file_path = os.path.join(config["device-dir"], config["weight_updates_file"])
-    dataset_id = config["dataset-id"]
+    data_dir = os.path.join(config["DEVICE_DIR"], config["DATA_DIR"])
+    checkpoint_file_path = os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"], config["CHECKPOINT_FILE"])
+    model_file_path = os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"], config["MODEL_FILE"])
+    weight_updates_file_path = os.path.join(config["DEVICE_DIR"], config["WEIGHT_UPDATES_FILEPATH"])
+    dataset_id = config["DATASET_ID"]
 
     logging.basicConfig()
     run()

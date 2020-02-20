@@ -1,13 +1,13 @@
-appName: fl-client
+APP_NAME: fl-client
 # logLevel: DEBUG
-port: 50051
-device-dir: "../device2"
-fl-init-dir: "fl_init_files"
-data-dir: "data"
-checkpoint_file: "fl_checkpoint"
-model_file: "model.h5"
-weight_updates_file: "weight_updates/fl_weight_updates"
-dataset-id: 1
-timeout-in-seconds: 10000
-address: "localhost:50051"
-chunker-size: 200
+PORT: 50051
+DEVICE_DIR: "../device2"
+FL_INIT_DIR: "fl_init_files"
+DATA_DIR: "data"
+CHECKPOINT_FILE: "fl_checkpoint"
+MODEL_FILE: "model.h5"
+WEIGHT_UPDATES_FILEPATH: "weight_updates/fl_weight_updates"
+DATASET_ID: 1
+TIMEOUT_IN_SECONDS: 10000
+SELECTOR_ADDRESS: "localhost:50051"
+CHUNKER_SIZE: 200
