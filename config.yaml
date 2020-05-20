@@ -1,12 +1,13 @@
 APP_NAME: fl-client
 # logLevel: DEBUG
 PORT: 50051
-DEVICE_DIR: "../device2"
+DEVICE_DIR: "../device_data"
 FL_INIT_DIR: "fl_init_files"
 DATA_DIR: "data"
 CHECKPOINT_FILE: "fl_checkpoint"
 MODEL_FILE: "model.h5"
-WEIGHT_UPDATES_FILEPATH: "weight_updates/fl_weight_updates"
+WEIGHT_UPDATES_DIR: "weight_updates"
+WEIGHT_UPDATES_FILE: "fl_weight_updates"
 DATASET_ID: 1
 TIMEOUT_IN_SECONDS: 10000
 SELECTOR_ADDRESS: "localhost:50051"

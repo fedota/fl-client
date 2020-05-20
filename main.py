@@ -1,6 +1,7 @@
 """Simulation for clients in federated-learning."""
 import logging
 import os
+import shutil
 
 import grpc
 import yaml
@@ -13,9 +14,23 @@ CONFIG_FILE = "config.yaml"
 config = {}
 
 
-def get_save_path(fileName):
+def getSavePath(fileName):
     """Directory path to store required files."""
     return os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"], fileName)
+
+def createDirectories():
+    fl_init_files_dir = os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"])
+    # Delete fl_init_files dir if it exists
+    if os.path.exists(fl_init_files_dir):
+        shutil.rmtree(fl_init_files_dir)
+    os.makedirs(fl_init_files_dir)          # Create empty fl_init_files dir
+
+    weight_updates_dir = os.path.join(config["DEVICE_DIR"], config["WEIGHT_UPDATES_DIR"])
+    # Delete weight_updates dir if it exists
+    if os.path.exists(weight_updates_dir):
+        shutil.rmtree(weight_updates_dir)
+    os.makedirs(weight_updates_dir)          # Create empty weight_updates dir
+
 
 
 def checkInMessages():
@@ -24,7 +39,7 @@ def checkInMessages():
     yield msg
 
 
-def get_weight_updates(weight_updates_file_path, num_batches, chunker_size):
+def getWeightUpdates(weight_updates_file_path, num_batches, chunker_size):
     """Gets the checkpoint weights."""
     with open(weight_updates_file_path, "rb") as file:
         chunk = file.read(chunker_size)
@@ -76,7 +91,7 @@ def run():
 
                 elif response.type == fl_round_pb2.FL_FILES:
                     with open(
-                        get_save_path(response.filePath), "ab+",
+                        getSavePath(response.filePath), "ab+",
                     ) as CHECKPOINT_FILE:
                         CHECKPOINT_FILE.write(response.chunk)
 
@@ -98,7 +113,7 @@ def run():
 
         print("----- Completed training on device -----")
 
-        updated_chunks = get_weight_updates(
+        updated_chunks = getWeightUpdates(
             weight_updates_path, num_batches, config["CHUNKER_SIZE"],
         )
         # print(updated_chunks)
@@ -113,8 +128,11 @@ if __name__ == "__main__":
     data_dir = os.path.join(config["DEVICE_DIR"], config["DATA_DIR"])
     checkpoint_file_path = os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"], config["CHECKPOINT_FILE"])
     model_file_path = os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"], config["MODEL_FILE"])
-    weight_updates_file_path = os.path.join(config["DEVICE_DIR"], config["WEIGHT_UPDATES_FILEPATH"])
+    weight_updates_file_path = os.path.join(config["DEVICE_DIR"], config["WEIGHT_UPDATES_DIR"], config["WEIGHT_UPDATES_FILE"])
     dataset_id = config["DATASET_ID"]
 
     logging.basicConfig()
+
+    createDirectories()
+
     run()
