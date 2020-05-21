@@ -55,17 +55,6 @@ def getWeightUpdates(weight_updates_file_path, num_batches, chunker_size):
         intVal=num_batches,
     )
 
-# Deletes FL init files
-def deleteFLInitFiles():
-    folder = os.path.join(config["DEVICE_DIR"], config["FL_INIT_DIR"])
-    for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
-
 def run():
     """Starts the grpc server to connect to selectors."""
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
@@ -108,8 +97,6 @@ def run():
             checkpoint_file_path,
             weight_updates_file_path,
         )
-
-        deleteFLInitFiles()
 
         print("----- Completed training on device -----")
 

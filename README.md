@@ -1,6 +1,8 @@
 # fl-client
 Python Client for simulating a device for federated learning
 
+### Run with docker
+
 * Build the client docker image
 `docker build -t fl-client .`
 
@@ -14,3 +16,19 @@ Python Client for simulating a device for federated learning
 
 * To remove the container
 `docker rm client1`
+
+### Run without docker
+
+* Create a virtual environment with
+`virtualenv fl`
+
+* Activate virtual environment with
+`source fl/bin/activate`
+ 
+* Install dependencies using
+`pip install -r requirements.txt`
+
+* Make necessary changes in `config.yaml`
+
+* Run fl-client with
+`python main.py`
