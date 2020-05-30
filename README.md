@@ -1,5 +1,18 @@
-# fl-client
-Python Client for simulating a device for federated learning
+# Client
+Python Client for the Federated learning system
+
+## Overview
+Client software is used by data organization providing data for a particular FL problem and has the following responsibilities.
+- Connect with the Selector to indicate availability to participate in the FL round
+- Train the received model on the data available locally
+- Report new checkpoint and weight (amount of data used) back to the Selector
+
+## Workflow
+- Each client for specific fl problem knows the address of the Selector to contact and sends a connection request to express availability
+- After it gets selected it receives the initial files like model, checkpoint, etc. for the problem through the Selector and starts training the model with the local data
+- Once training is complete the updated checkpoint and weight, no of training batches, are sent to the Selector 
+
+## Setup
 
 ### Run with docker
 
